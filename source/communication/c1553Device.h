@@ -4,6 +4,7 @@
 class c1553Device
 {
 public:
+	virtual ~c1553Device(){ }	
 	virtual void initialize() = 0;
 	virtual void deInitialize() = 0;
 	virtual void configure() = 0;
