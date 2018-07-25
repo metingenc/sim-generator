@@ -1,5 +1,6 @@
-#include "BU67103x.h"
 #include <iostream>
+#include "BU67103x.h"
+#include <stdemace.h>
 
 BU67103x::BU67103x()
 {
@@ -14,6 +15,7 @@ BU67103x::~BU67103x()
 void BU67103x::initialize()
 {
    std::cout << "BU67103x is initializing" << std::endl;
+   aceFree(0);
 }
 
 void BU67103x::deInitialize()
