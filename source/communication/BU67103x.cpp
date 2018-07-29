@@ -1,10 +1,11 @@
 #include <iostream>
 #include "BU67103x.h"
-#include <stdemace.h>
+#include "config.h"
 
-BU67103x::BU67103x()
+
+BU67103x::BU67103x() : mLibVersion(0,0,0)
 {
-
+  
 }
 
 BU67103x::~BU67103x()
@@ -13,39 +14,121 @@ BU67103x::~BU67103x()
 }
 
 void BU67103x::initialize()
-{
-   std::cout << "BU67103x is initializing" << std::endl;
-   aceFree(0);
+{ 
+	S16BIT wResult = 0x0000;
+
+	show("BU67103x is initializing...");    	
+
+	getVersion();
+	
+	wResult = aceInitialize(cDeviceNumber,cAccess,cMode,cMemoryWordSize,cRegisterAddress,cDeviceMemoryAddres);
+	if(ACE_ERR_SUCCESS != wResult)
+	{
+  		getError(wResult);
+  		return 0;
+	}  
+	else
+	{
+		show("BU67103x is initialized succcesfully:");
+		show("LDN: " + std::to_string(cDeviceNumber));
+		show("Access: " + std::to_string(cAccess));
+		show("Mode: " + std::to_string(cMode));
+	}
+  
 }
 
 void BU67103x::deInitialize()
 {
-   std::cout << "BU67103x is deInitializing" << std::endl;
+   S16BIT wResult = 0x0000;
+
+   show("BU67103x is deInitializing");
+
+   wResult = aceFree(cDeviceNumber);
+   if(ACE_ERR_SUCCESS != wResult)
+   {
+   	  getError(wResult);
+   }
+   else
+   {
+    	show("BU67103x is deinitialized successfully: ");
+    	show("LDN: " + std::to_string(cDeviceNumber));
+   }
+
 }
 
 void BU67103x::configure()
 {
-   std::cout << "BU67103x is configuring" << std::endl;
+   show("BU67103x is configuring");
 }
 
 void BU67103x::start()
 {
-   std::cout << "BU67103x is starting" << std::endl;
+   show("BU67103x is starting");
 }
 
 void BU67103x::stop()
 {
-   std::cout << "BU67103x is stoping" << std::endl;
+   show("BU67103x is stoping");
 }
 
 void BU67103x::read()
 {
-   std::cout << "BU67103x is reading" << std::endl;
+   show("BU67103x is reading");
 }
 
 void BU67103x::write()
 {
-   std::cout << "BU67103x is writing" << std::endl;
+   show("BU67103x is writing");
+}
+
+void BU67103x::show(const std::string text)
+{
+	std::cout << text << std::endl;
+}
+
+/*******************************************************************************
+ * Name:    PrintHeader
+ *
+ * Description:
+ *
+ *      Prints the sample program header.
+ *
+ * In   none
+ * Out  none
+ ******************************************************************************/
+
+void BU67103x::getVersion(void)
+{
+    U16BIT wLibVer;
+    std::string version = ""; 
+
+    wLibVer = aceGetLibVersion();
+
+    mLibVersion.major = wLibVer>>8;
+    mLibVersion.minor = (wLibVer&0xF0)>>4;
+    mLibVersion.development = (wLibVer&0xF);
+
+    version.append("==============================================\n");    
+    version.append("AceXtreme Integrated 1553 Terminal            \n");
+    version.append("BU-69092 1553 Runtime Library                 \n");
+    version.append("Release Rev: ");
+    version.append(std::to_string(mLibVersion.major) + ".");
+    version.append(std::to_string(mLibVersion.minor)+ ".");
+    version.append(std::to_string(mLibVersion.development)+ ".");
+    if ((wLibVer&0xF)!=0)
+    version.append(" (INTERIM VERSION)");
+	show(version);
+
+}
+
+void BU67103x::getError(S16BIT nResult)
+{
+   std::string errorMessage = "";
+   char buf[80];
+   aceErrorStr(nResult,buf,80);
+   errorMessage.append("[Error]: RTL Function Failure: ");
+   errorMessage.append(buf);
+   show(errorMessage);   
 }
 
 
