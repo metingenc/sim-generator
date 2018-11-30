@@ -19,7 +19,7 @@ add_definitions(-Weffc++)
 
 include_directories(source)
 include_directories(externals/aceXtreme/include)
-link_directories(externals/aceXtreme/lib/win/x64/release)
+link_directories(externals/aceXtreme/lib/win/x32/release)
 
 add_subdirectory(source)
 

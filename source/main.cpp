@@ -8,6 +8,7 @@ int main()
 
    c1553Device *device = new BU67103x();
    device->initialize();
+   device->configure();
    device->deInitialize();
 
    return 0;

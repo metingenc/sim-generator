@@ -12,23 +12,25 @@ const unsigned int       cDeviceMemoryAddres = 0; // [No valid option for aceXtr
 //aceBCDataBlkCreate: the maximum number of data blocks available is limited to 2047.
 const short int          cDataBlockId = 0x0001;   // [must be > 0] 
 const unsigned short int cDataBlockSize = 32;     // [1 - 32768] word
-// const unsigned short int *pBuffer
+// unsigned short int *pBuffer
 const unsigned short int cBufferSize = 32;        // [less or equal to buffer and cDataBlockSize]
 
 // Option 1 aceBCMsgCreateBCtoRT
 // Option 2 aceBCMsgCreateRTtoBC
-// Option 3 aceBCAsyncMsgCreateRTtoBC const unsigned short int *pBuffer
-// Option 4 aceBCAsyncMsgCreateBCtoRT const unsigned short int *pBuffer
-// Option 5 aceBCAsyncMsgCreateRTtoRT const unsigned short int *pBuffer
+// Option 3 aceBCAsyncMsgCreateRTtoBC +const unsigned short int *pBuffer
+// Option 4 aceBCAsyncMsgCreateBCtoRT +const unsigned short int *pBuffer
+// Option 5 aceBCMsgCreateRTtoRT 
 const short int          cMessageBlockkId = 0;    // [must be unique and > 0]
-const short int          cBCtoRTDataBlockId = 0;  // cDataBlockId
+const short int          cDataBlockId2 = 0;  	  // cDataBlockId
 const unsigned short int cRemoteTerminal = 0;     // Remote Terminal address of destination RT [x-x]
 const unsigned short int cSubAddress = 0;         // Remote Terminal subaddress [x-x]
 const unsigned short int cBCtoRTWordCount = 0;    // Message word count of message [1-32]
 const unsigned short int cBCtoRTMessageGapTime = 0;// The time to next msg in μ seconds
 const unsigned int       cBCtoRTMessageOptions = 0;// use ACE_BCCTRL_CHL_A
 
-// Option 6 aceBCMsgCreateRTtoRT
+
+// Option 6 aceBCAsyncMsgCreateRTtoRT const unsigned short int *pBuffer 
+// Option 7 aceBCMsgCreateRTtoRT const unsigned short int *pBuffer 
 const short int          cMessageBlockId = 0;     // [must be unique and >= 0]
 const short int 		 cRTtoRTDataBlockId = 0;  // cDataBlockId
 const unsigned short int cRemoteTerminalRx = 0;   // Receiving Remote Terminal address of destination RT

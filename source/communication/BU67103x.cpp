@@ -24,8 +24,7 @@ void BU67103x::initialize()
 	wResult = aceInitialize(cDeviceNumber,cAccess,cMode,cMemoryWordSize,cRegisterAddress,cDeviceMemoryAddres);
 	if(ACE_ERR_SUCCESS != wResult)
 	{
-  		getError(wResult);
-  		return 0;
+  		getError(wResult);  		
 	}  
 	else
 	{
@@ -33,8 +32,7 @@ void BU67103x::initialize()
 		show("LDN: " + std::to_string(cDeviceNumber));
 		show("Access: " + std::to_string(cAccess));
 		show("Mode: " + std::to_string(cMode));
-	}
-  
+	}  
 }
 
 void BU67103x::deInitialize()
@@ -59,26 +57,62 @@ void BU67103x::deInitialize()
 void BU67103x::configure()
 {
    show("BU67103x is configuring");
+   //aceBCConfigure()
+   
+  // #STEP1 Creating BC Objects ================================
+       // Creating Data Blocks          
+          // aceBCDataBlkCreate
+  // ===========================================================
+
+  // #STEP2 Creating Message Blocks ============================
+          // aceBCMsgCreateBCtoRT() ||aceBCAsyncMsgCreateBCtoRT
+          // aceBCMsgCreateRTtoBC() ||aceBCAsyncMsgCreateRTtoBC
+  // ===========================================================  
+
+  //  #STEP3 Building BC Frames =================================
+     // Creating Message Opcodes
+        // aceBCOpCodeCreate()
+     // Creating Minor Frame Opcodes
+        // aceBCOpCodeCreate : ACE_OPCODE_CAL
+     // Creating BC Major Frames
+        // aceBCFrameCreate()
+   // ===========================================================  
+
+   // #STEP4 Creating Host Buffer ================================  
+       // aceBCInstallHBuf()
+   // ===========================================================       
+   
+   // aceBCOpCodeCreate() ACE_OPCODE_XEQ
+   // aceBCFrameCreate() ACE_FRAME_MINOR
+   // aceBCOpcodeCreate() ACE_OPCODE_CAL
+   // aceBCFrameCreate() ACE_FRAME_MAJOR
+
 }
 
 void BU67103x::start()
 {
    show("BU67103x is starting");
+   // aceBCStart()
 }
 
 void BU67103x::stop()
 {
    show("BU67103x is stoping");
+   // aceBCStop()
 }
 
 void BU67103x::read()
 {
    show("BU67103x is reading");
+   // aceBCGetHBufMsgDecoded()
+   // aceBCDataBlkRead()
 }
 
 void BU67103x::write()
 {
    show("BU67103x is writing");
+   // aceBCDataBlkWrite()
+   // aceBCSendAsyncMsgHP()
 }
 
 void BU67103x::show(const std::string text)
