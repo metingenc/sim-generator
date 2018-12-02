@@ -15,11 +15,13 @@ set(CMAKE_CXX_STANDART 14)
 add_definitions(-Wfatal-errors)
 add_definitions(-Wall)
 add_definitions(-Wextra)
-add_definitions(-Weffc++)
+#add_definitions(-Weffc++)
 
 include_directories(source)
 include_directories(externals/aceXtreme/include)
-link_directories(externals/aceXtreme/lib/win/x32/release)
+include_directories(externals/pugixml-1.9/include)
+link_directories(externals/aceXtreme/lib/win/x64/release)
+link_directories(externals/pugixml-1.9/lib)
 
 add_subdirectory(source)
 

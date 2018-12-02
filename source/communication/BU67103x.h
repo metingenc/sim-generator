@@ -1,9 +1,13 @@
 #ifndef BU67103X_H
 #define BU67103X_H
 
-#include "c1553Device.h"
 #include <string>
 #include <stdemace.h>
+#include <map>
+
+#include "c1553Device.h"
+#include "AceBCMessage.h"
+#include "AceDevice.h"
 
 struct LibVersion
 {
@@ -27,8 +31,11 @@ class BU67103x : public c1553Device
 public:
    BU67103x();
    ~BU67103x();
+   void initialize(AceDevice device);
+   void deInitialize(AceDevice device);
    void initialize();
    void deInitialize();
+   void configure(AceDevice device, std::map<short, AceBCMessage> messages);
    void configure();
    void start();
    void stop();
@@ -37,11 +44,13 @@ public:
    void show(const std::string text);
    
  private:
+    bool mIsInitialized;
+    bool mIsConfigurated;
   	void getVersion(void);	
   	void getError(S16BIT nResult);
-	struct LibVersion mLibVersion;
-  	
+	  struct LibVersion mLibVersion;
 
+    void createBCObjects(AceDevice device, std::map<short, AceBCMessage> messages);
 
 };
 
