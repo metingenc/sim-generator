@@ -1,5 +1,5 @@
 #include <iostream>
-#include <map>
+
 #include "BU67103x.h"
 #include "config.h"
 
@@ -264,6 +264,116 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
 
   // ======================================================================================================
 
+  std::map<unsigned, std::vector<short>> periodMap;
+  std::vector<int> periodList;
+  std::map<unsigned, std::vector<short>> minorFrameList;
+
+
+  for(auto it = messages.begin(); it != messages.end(); ++it)
+  {
+    if(SyncType::SYNC == it->second.getSyncType())
+    {      
+      unsigned key = 1000/it->second.getFrequency();
+      short value = it->second.getMessageBlockId();
+      periodMap[key].push_back(value);      
+    }
+  }
+  
+  for(auto it = periodMap.begin(); it != periodMap.end(); ++it)
+  {
+      unsigned key = it->first;
+      periodList.push_back(key);
+      std::cout<<"\n["<<1000/key<<"Hz]\t";
+      for(auto itv = it->second.begin(); itv != it->second.end(); ++itv)
+      {
+        short value = *itv;
+        std::cout<<value<<" ";        
+      }     
+      
+  }
+
+  std::cout<<"\n[LCM]\t"<<getLCM(periodList)<<"ms"<<std::endl;
+  std::cout<<"[GCD]\t"<<getGCD(periodList)<<"ms"<<std::endl;
+  std::cout<<"[MJR]\t"<<getLCM(periodList)/getGCD(periodList)<<" Minor Frames"<<std::endl;
+
+  for(int period = 0; period <getLCM(periodList); period += getGCD(periodList))
+  {
+     std::cout<<"\n["<<period<<"]\t";
+
+      for(auto it = periodMap.begin(); it != periodMap.end(); ++it)
+      {
+        if((period % it->first) == 0)
+        {
+           for(auto itm = it->second.begin(); itm != it->second.end(); ++itm)
+           {
+              minorFrameList[period].push_back(*itm);  
+              std::cout<<*itm<<" ";              
+           }
+           
+        }
+      }
+
+     //if(period%)
+     //minorFrameList[period].push_back( frequencyMap );
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // ======================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   //  #Step3 Building BC Frames =================================
      // Creating Message Opcodes
         // aceBCOpCodeCreate()
@@ -275,12 +385,8 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
 
    // #STEP4 Creating Host Buffer ================================  
        // aceBCInstallHBuf()
-   // ===========================================================       
-   
-   // aceBCOpCodeCreate() ACE_OPCODE_XEQ
-   // aceBCFrameCreate() ACE_FRAME_MINOR
-   // aceBCOpcodeCreate() ACE_OPCODE_CAL
-   // aceBCFrameCreate() ACE_FRAME_MAJOR
+   // ===========================================================        
+
 }
 
 void BU67103x::start()
@@ -358,6 +464,45 @@ void BU67103x::getError(S16BIT nResult)
    errorMessage.append("\n[ERROR]\tRTL Function Failure:");
    errorMessage.append(buf);
    std::cout<<errorMessage<<std::endl;   
+}
+
+
+// Utility function to find 
+// GCD of 'a' and 'b' 
+int BU67103x::getGCD(int a, int b) 
+{ 
+    if (b == 0) 
+        return a; 
+    return getGCD(b, a % b); 
+} 
+
+// Function to find gcd of array of 
+// numbers 
+int BU67103x::getGCD(std::vector<int> list) 
+{ 
+    int gcd = list[0]; 
+
+    for(auto it = list.begin(); it != list.end(); ++it)
+    {
+        gcd = getGCD(*it, gcd); 
+    }   
+  
+    return gcd; 
+} 
+
+long long BU67103x::getLCM(std::vector<int> list)
+{
+    // Initialize result 
+    long long lcm = list[0]; 
+  
+    // ans contains LCM of list[0], ..list[i] 
+    // after i'th iteration,     
+    for(auto it = list.begin(); it != list.end(); ++it)
+    {
+        lcm = (((*it * lcm)) / (getGCD(*it, lcm))); 
+    }
+  
+    return lcm; 
 }
 
 

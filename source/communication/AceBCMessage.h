@@ -14,7 +14,7 @@ union Key
 		unsigned sa:5; 
 		unsigned type:4;
 		unsigned rt:5;
-		unsigned sync:5;
+		unsigned sync:1;
 	}member;
 };
 
@@ -223,6 +223,9 @@ class AceBCMessage
 		    key.member.rt = mRemoteTerminal;
 		    key.member.type = static_cast<short>(mMessageType);
 		    key.member.sa = mSubAdress; 
+
+		    mMessageBlockId = key.value;
+			mDataBlockId = key.value;
 		    
 			return key.value;
 		}

@@ -4,6 +4,7 @@
 #include <string>
 #include <stdemace.h>
 #include <map>
+#include <vector>
 
 #include "c1553Device.h"
 #include "AceBCMessage.h"
@@ -51,6 +52,10 @@ public:
 	  struct LibVersion mLibVersion;
 
     void createBCObjects(AceDevice device, std::map<short, AceBCMessage> messages);
+
+    int getGCD(int a, int b); 
+    int getGCD(std::vector<int> list); 
+    long long getLCM(std::vector<int> list);
 
 };
 

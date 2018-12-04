@@ -6,27 +6,14 @@
 #include "communication/AceDevice.h"
 #include "loader/ConfigLoader.h"
 #include "loader/BcMessageLoader.h"
-
-
-
-/*
-			 MessageType messageType,
-			 SyncType syncType, 
-			 unsigned frequency,
-			 short messageBlockId,
-			 short dataBlockId,
-			 unsigned short rt,
-			 unsigned short sa,
-			 unsigned short wc,
-			 unsigned short time,
-			 unsigned option
-*/			
+	
 
 int main()
 {
 	std::cout<<" ============================================================"<<std::endl;
     std::cout<<"|                     SIM-GENERATOR v0.1                     |"<<std::endl;
     std::cout<<" ============================================================"<<std::endl;
+
 
     BU67103x *device = new BU67103x();
 
