@@ -2,6 +2,7 @@
 #define ACE_BC_MESSAGE_H
 
 #include <iostream>
+#include <vector>
 
 enum SyncType { SYNC = 0, ASYNC = 1};
 enum MessageType {BCtoRT = 0, RTtoBC = 1, RTtoRT = 2};
@@ -32,8 +33,7 @@ class AceBCMessage
 						 mSubAdress(0),
 						 mWordCount(0),
 						 mMessageGapTime(0),
-						 mMessageOptions(0),
-						 mBuffer(NULL)
+						 mMessageOptions(0)						 
 		{
 
 		}
@@ -48,8 +48,8 @@ class AceBCMessage
 					unsigned short sa,
 					unsigned short wc,
 					unsigned short time,
-					unsigned option
-					/*unsigned short *buffer*/)
+					unsigned option,
+					std::vector<unsigned short> buffer)
 		{
 			mName = name;
 			mMessageType = messageType;
@@ -63,7 +63,7 @@ class AceBCMessage
 			mMessageGapTime = time;
 			mMessageOptions = option;
 			generateKey();
-			// mBuffer TBD
+			mBuffer = buffer;
 		}
 
 		~AceBCMessage()
@@ -132,7 +132,7 @@ class AceBCMessage
 
 		unsigned short* getBuffer()
 		{
-			return mBuffer;
+			return &mBuffer[0];
 		}
 
 		void setName(std::string name)
@@ -190,9 +190,9 @@ class AceBCMessage
 			mMessageOptions = option;
 		}
 
-		void setBuffer(/*unsigned short *buffer*/)
+		void setBuffer(std::vector<unsigned short> buffer)
 		{			
-			// copy buffer to mBuffer
+			mBuffer = buffer;
 		}
 
 		short generateKey()
@@ -242,7 +242,7 @@ class AceBCMessage
 		unsigned short mWordCount;
 		unsigned short mMessageGapTime;
 		unsigned mMessageOptions;
-		unsigned short *mBuffer;
+		std::vector<unsigned short> mBuffer;
 };
 
 #endif

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Config name="BU67103x">
 	<Params>
-		<Param deviceNumber="0"/>		<!-- Logical Device Number [0-31]-->
+		<Param deviceNumber="1"/>		<!-- Logical Device Number [0-31]-->
 		<Param access="0"/>				<!-- ACE_ACCESS_CARD [Only valid option for aceXtreme] -->		
 		<Param mode="1"/>				<!-- ACE_MODE_BC :Sets up the device to run as a bus controller-->
 		<Param memoryWordSize="0"/>		<!-- Default:0 [No valid option for aceXtreme]-->

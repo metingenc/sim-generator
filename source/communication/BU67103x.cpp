@@ -4,7 +4,7 @@
 #include "config.h"
 
 
-BU67103x::BU67103x() : mIsInitialized(false), mIsConfigurated(false), mLibVersion(0,0,0)
+BU67103x::BU67103x() : mIsInitialized(false), mIsConfigurated(false), mIsStarted(false), mLibVersion(0,0,0)
 {
   getVersion();
 }
@@ -14,18 +14,16 @@ BU67103x::~BU67103x()
 
 }
 
-void BU67103x::initialize()
-{
-
-}
-
-void BU67103x::initialize(AceDevice device)
+void BU67103x::initialize(AceDevice aceConfig, std::map<short,AceBCMessage> messages)
 { 
 	S16BIT wResult = 0x0000;	
 
+  mConfig = aceConfig;
+  mMessages = messages;
+
   std::cout << "\tBU67103x is initializing...";  
 	
-	wResult = aceInitialize(device.getDeviceNumber(),device.getAccess(),device.getMode(),device.getMemoryWordSize(),device.getRegisterAddress(),device.getDeviceMemoryAddres());
+	wResult = aceInitialize(mConfig.getDeviceNumber(),mConfig.getAccess(),mConfig.getMode(),mConfig.getMemoryWordSize(),mConfig.getRegisterAddress(),mConfig.getDeviceMemoryAddres());
 	
   if(ACE_ERR_SUCCESS != wResult)
 	{
@@ -36,24 +34,24 @@ void BU67103x::initialize(AceDevice device)
     mIsInitialized = true;
     std::cout <<"\r[OK]"<<std::endl;
 		std::cout<<"[OK]\tBU67103x is initialized."<<std::endl;
-		std::cout<<"\tLDN:\t" + std::to_string(device.getDeviceNumber())<<std::endl;
-		std::cout<<"\tAccess:\t" + std::to_string(device.getAccess())<<std::endl;
-		std::cout<<"\tMode:\t" + std::to_string(device.getMode())<<std::endl;
+		std::cout<<"\tLDN:\t" + std::to_string(mConfig.getDeviceNumber())<<std::endl;
+		std::cout<<"\tAccess:\t" + std::to_string(mConfig.getAccess())<<std::endl;
+		std::cout<<"\tMode:\t" + std::to_string(mConfig.getMode())<<std::endl;
 	}  
+}
+
+void BU67103x::initialize()
+{
+
 }
 
 void BU67103x::deInitialize()
 {
-
-}
-
-void BU67103x::deInitialize(AceDevice device)
-{
    S16BIT wResult = 0x0000;
 
-   show("BU67103x is deInitializing");
+   std::cout<<"\n\tBU67103x is deInitializing";
 
-   wResult = aceFree(device.getDeviceNumber());
+   wResult = aceFree(mConfig.getDeviceNumber());
    if(ACE_ERR_SUCCESS != wResult)
    {
    	  getError(wResult);
@@ -61,30 +59,27 @@ void BU67103x::deInitialize(AceDevice device)
    else
    {
       mIsInitialized = false;
-    	show("BU67103x is deinitialized successfully: ");
-    	show("LDN: " + std::to_string(device.getDeviceNumber()));
+      mIsStarted = false;
+      mIsConfigurated = false;
+    	std::cout<<"\n[OK]\tBU67103x is deinitialized successfully: ";
+    	std::cout<<"\n\tLDN: " + std::to_string(mConfig.getDeviceNumber());
    }
 
 }
 
 void BU67103x::configure()
 {
-
-}
-
-void BU67103x::configure(AceDevice device, std::map<short, AceBCMessage> messages)
-{
   S16BIT wResult = 0x0000;
 
   if (!mIsInitialized)
   {
-      std::cout<<"[WARN]\tBefore you configure, device must be initialized."<<std::endl;
+      std::cout<<"[WARN]\tBefore you configure, mConfig must be initialized."<<std::endl;
       return;
   }    
   
   std::cout<<"\tBU67103x is configuring..."; 
 
-  wResult = aceBCConfigure(device.getDeviceNumber(), device.getBcConfigureOptions());
+  wResult = aceBCConfigure(mConfig.getDeviceNumber(), mConfig.getBcConfigureOptions());
 
    if(ACE_ERR_SUCCESS != wResult)
    {
@@ -95,37 +90,38 @@ void BU67103x::configure(AceDevice device, std::map<short, AceBCMessage> message
    {
       mIsConfigurated = true;
       std::cout<<"\r[OK]"<<std::endl;
-      std::cout<<"\tOptions: "<<device.getBcConfigureOptions()<<std::endl;
+      std::cout<<"\tOptions: "<<mConfig.getBcConfigureOptions()<<std::endl;
    }
 
-   createBCObjects(device, messages);
+   createBCObjects();
 }
 
-void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> messages)
+void BU67103x::createBCObjects()
 {
-  unsigned short wBuffer[32] =  { 0x0000,0x1111,0x2222,0x3333,0x4444,0x5555,0x6666,0x7777,
-                                  0x8888,0x9999,0xAAAA,0xBBBB,0xCCCC,0xDDDD,0xEEEE,0XFFFF,
-                                  0x0000,0x1111,0x2222,0x3333,0x4444,0x5555,0x6666,0x7777,
-                                  0x8888,0x9999,0xAAAA,0xBBBB,0xCCCC,0xDDDD,0xEEEE,0XFFFF};
+  std::vector<unsigned short> wBuffer { 0xFFFF,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
 
-  S16BIT wResult;
+  signed short wResult;
   
   if (!mIsConfigurated)
   {
-      std::cout<<"[WARN]\tBefore you create objects, device must be configurated."<<std::endl;
+      std::cout<<"[WARN]\tBefore you create objects, mConfig must be configurated."<<std::endl;
       return;
   } 
 
   
   // # Step1 Creating BC Data Blocks=======================================================================  
 
-  std::cout<<"\tBC data blocks are creating..."<<std::endl;
+  std::cout<<"\n\tBC data blocks are creating..."<<std::endl;
 
-  for(auto it = messages.begin(); it != messages.end(); ++it)
+  for(auto it = mMessages.begin(); it != mMessages.end(); ++it)
   {    
+    it->second.setBuffer(wBuffer);
     if(SyncType::SYNC == it->second.getSyncType())
-    {
-      wResult = aceBCDataBlkCreate(device.getDeviceNumber(), it->first, ACE_BC_DBLK_SINGLE, wBuffer, 32); 
+    {      
+      wResult = aceBCDataBlkCreate(mConfig.getDeviceNumber(), it->first, ACE_BC_DBLK_SINGLE, it->second.getBuffer(), 32); 
 
       if(ACE_ERR_SUCCESS != wResult)
       {
@@ -144,16 +140,16 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
 
   // # Step2 Creating Message Blocks ======================================================================
   
-  std::cout<<"\tBC message blocks are creating..."<<std::endl;
+  std::cout<<"\n\tBC message blocks are creating..."<<std::endl;
   
-  for(auto it = messages.begin(); it != messages.end(); ++it)
+  for(auto it = mMessages.begin(); it != mMessages.end(); ++it)
   {  
-
+    it->second.setBuffer(wBuffer);
     if(MessageType::BCtoRT == it->second.getMessageType())  
     {
         if(SyncType::SYNC == it->second.getSyncType())
         {
-          wResult = aceBCMsgCreateBCtoRT(device.getDeviceNumber(), 
+          wResult = aceBCMsgCreateBCtoRT(mConfig.getDeviceNumber(), 
                                          it->first,
                                          it->first,
                                          it->second.getRemoteTerminal(),
@@ -175,7 +171,7 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
         }
         else if(SyncType::ASYNC == it->second.getSyncType())
         {
-            wResult = aceBCAsyncMsgCreateBCtoRT(device.getDeviceNumber(), 
+            wResult = aceBCAsyncMsgCreateBCtoRT(mConfig.getDeviceNumber(), 
                                                 it->first,
                                                 it->first,
                                                 it->second.getRemoteTerminal(),
@@ -183,7 +179,7 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
                                                 it->second.getWordCount(),
                                                 it->second.getMessageGapTime(),
                                                 it->second.getMessageOptions(),
-                                                wBuffer
+                                                it->second.getBuffer()
                                                 );
 
             if(ACE_ERR_SUCCESS != wResult)
@@ -206,7 +202,7 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
     {
         if(SyncType::SYNC == it->second.getSyncType())
         {
-          wResult = aceBCMsgCreateRTtoBC(device.getDeviceNumber(), 
+          wResult = aceBCMsgCreateRTtoBC(mConfig.getDeviceNumber(), 
                                          it->first,
                                          it->first,
                                          it->second.getRemoteTerminal(),
@@ -228,7 +224,7 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
         }
         else if(SyncType::ASYNC == it->second.getSyncType())
         {
-            wResult = aceBCAsyncMsgCreateRTtoBC(device.getDeviceNumber(), 
+            wResult = aceBCAsyncMsgCreateRTtoBC(mConfig.getDeviceNumber(), 
                                                 it->first,
                                                 it->first,
                                                 it->second.getRemoteTerminal(),
@@ -236,7 +232,7 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
                                                 it->second.getWordCount(),
                                                 it->second.getMessageGapTime(),
                                                 it->second.getMessageOptions(),
-                                                wBuffer
+                                                it->second.getBuffer()
                                                 );
 
             if(ACE_ERR_SUCCESS != wResult)
@@ -264,12 +260,43 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
 
   // ======================================================================================================
 
+  //  #Step3 Building BC Frames ===========================================================================
+     // Creating Message Opcodes
+  std::cout<<"\n\tBC message opcodes are creating..."<<std::endl;
+ 
+  for(auto it = mMessages.begin(); it != mMessages.end(); ++it)
+  {  
+    if(SyncType::SYNC == it->second.getSyncType())
+    {
+      wResult = aceBCOpCodeCreate(mConfig.getDeviceNumber(), 
+                                     it->first,
+                                     ACE_OPCODE_XEQ,
+                                     ACE_CNDTST_ALWAYS,
+                                     it->first,
+                                     0,
+                                     0);
+
+      if(ACE_ERR_SUCCESS != wResult)
+      {
+        getError(wResult);
+        std::cout<<"\t"<<it->first<<"\t"<<it->second.getName()<<" Message opcode creation failed." <<std::endl;
+        return;
+      }
+      else
+      {
+        std::cout<<"[OK]\t"<<it->first<<"\t"<<it->second.getName()<<" Message opcode creation succeeded." <<std::endl;     
+      }  
+    }      
+  } 
+ // ===================================================================================================================================
+
   std::map<unsigned, std::vector<short>> periodMap;
-  std::vector<int> periodList;
-  std::map<unsigned, std::vector<short>> minorFrameList;
+  std::vector<short> periodList;
+  std::map<unsigned, std::vector<short>> minorFrameMap;
+  std::vector<short> minorFrameList;
 
-
-  for(auto it = messages.begin(); it != messages.end(); ++it)
+  // Create Period,OUID List
+  for(auto it = mMessages.begin(); it != mMessages.end(); ++it)
   {
     if(SyncType::SYNC == it->second.getSyncType())
     {      
@@ -279,6 +306,8 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
     }
   }
   
+  // Print List
+  std::cout<<"\n\tFrequency OUID List";
   for(auto it = periodMap.begin(); it != periodMap.end(); ++it)
   {
       unsigned key = it->first;
@@ -292,113 +321,202 @@ void BU67103x::createBCObjects(AceDevice device, std::map<short, AceBCMessage> m
       
   }
 
+  std::cout<<"\n\n\tFrame Creation Parameters:";
   std::cout<<"\n[LCM]\t"<<getLCM(periodList)<<"ms"<<std::endl;
   std::cout<<"[GCD]\t"<<getGCD(periodList)<<"ms"<<std::endl;
   std::cout<<"[MJR]\t"<<getLCM(periodList)/getGCD(periodList)<<" Minor Frames"<<std::endl;
 
+  // Major Frame Structure
   for(int period = 0; period <getLCM(periodList); period += getGCD(periodList))
   {
-     std::cout<<"\n["<<period<<"]\t";
-
+      minorFrameList.push_back(period);
       for(auto it = periodMap.begin(); it != periodMap.end(); ++it)
-      {
+      {        
         if((period % it->first) == 0)
         {
            for(auto itm = it->second.begin(); itm != it->second.end(); ++itm)
            {
-              minorFrameList[period].push_back(*itm);  
-              std::cout<<*itm<<" ";              
+              minorFrameMap[period].push_back(*itm);                            
            }
            
         }
-      }
-
-     //if(period%)
-     //minorFrameList[period].push_back( frequencyMap );
+        else if(minorFrameMap[period].size() == 0)
+        {
+            minorFrameMap[period].push_back(0); 
+        }
+      }    
+     
   }
 
+  // Print Major Frame Structure
+  std::cout<<"\n\tMajor Frame Structure";
+  for(auto it = minorFrameMap.begin(); it != minorFrameMap.end(); ++it)
+  {
+    std::cout<<"\n["<<it->first<<"]\t";             
+    for(auto itm = it->second.begin(); itm != it->second.end(); ++itm)
+    {       
+      std::cout<<*itm<<" ";              
+    }
+  }
+
+  // Creating Minor Frame Opcodes
+  std::cout<<"\n\tBC minor frame opcodes are creating..."<<std::endl;
+
+  for(auto it = minorFrameMap.begin(); it != minorFrameMap.end(); ++it)
+  {
+     if(0 != it->second[0] ) 
+     {
+        wResult = aceBCOpCodeCreate(mConfig.getDeviceNumber(), 
+                                       it->first,
+                                       ACE_OPCODE_CAL,
+                                       ACE_CNDTST_ALWAYS,
+                                       it->first,
+                                       0,
+                                       0);              
+     }
+     else
+     {
+        wResult = aceBCOpCodeCreate(mConfig.getDeviceNumber(), 
+                                       it->first,
+                                       ACE_OPCODE_CAL,
+                                       ACE_CNDTST_NEVER,
+                                       it->first,
+                                       0,
+                                       0);      
+     }
 
 
 
+      if(ACE_ERR_SUCCESS != wResult)
+      {
+        getError(wResult);
+        std::cout<<"[FAIL]\t"<<it->first<<".ms"<<"Message opcode creation failed." <<std::endl;
+        return;
+      }
+      else
+      {
+        std::cout<<"[OK]\t"<<it->first<<".ms"<<"Message opcode creation succeeded." <<std::endl;     
+      }        
 
+  }
 
+  // Creating BC Minor Frames
+  std::cout<<"\n\tBC minor frame(s) are creating..."<<std::endl;
 
+  for(auto it = minorFrameMap.begin(); it != minorFrameMap.end(); ++it)
+  {
+ 
+      wResult = aceBCFrameCreate(mConfig.getDeviceNumber(), 
+                                       it->first,
+                                       ACE_FRAME_MINOR,
+                                       &it->second[0],
+                                       it->second.size(),
+                                       getGCD(periodList) * 10, // 0 durumunu test et
+                                       0);              
 
+      if(ACE_ERR_SUCCESS != wResult)
+      {
+        getError(wResult);
+        std::cout<<"[FAIL]\t"<<it->first<<".ms"<<"BC minor frame(s) are creation failed." <<std::endl;
+        return;
+      }
+      else
+      {
+        std::cout<<"[OK]\t"<<it->first<<".ms"<<"BC minor frame(s) are creation succeeded.\n\tACE_FRAME_MINOR\n\t"<<"Frame Time:"<<getGCD(periodList) * 10<<".ms" <<std::endl;     
+      }        
 
+  }
 
+   // Creating BC Major Frames
+  std::cout<<"\n\tBC major frame is creating..."<<std::endl;
 
+  wResult = aceBCFrameCreate(mConfig.getDeviceNumber(), 
+                             cMajorFrameId,
+                             ACE_FRAME_MAJOR,
+                             &minorFrameList[0],
+                             minorFrameList.size(),
+                             (getGCD(periodList) * 10), // 0 durumunu test et
+                             0);              
 
+  if(ACE_ERR_SUCCESS != wResult)
+  {
+    getError(wResult);
+    std::cout<<"[FAIL]\t"<<"1 BC major frame(s) are creation failed." <<std::endl;
+    return;
+  }
+  else
+  {
+    std::cout<<"[OK]\t"<<"1 BC major frame(s) are creation succeeded.\n\tACE_FRAME_MAJOR\n\t"<<"Frame Time:"<<getGCD(periodList) * 10<<".ms" <<std::endl;     
+  }        
 
+  mIsConfigurated = true;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // ======================================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //  #Step3 Building BC Frames =================================
-     // Creating Message Opcodes
-        // aceBCOpCodeCreate()
-     // Creating Minor Frame Opcodes
-        // aceBCOpCodeCreate : ACE_OPCODE_CAL
-     // Creating BC Major Frames
-        // aceBCFrameCreate()
-   // ===========================================================  
-
-   // #STEP4 Creating Host Buffer ================================  
-       // aceBCInstallHBuf()
-   // ===========================================================        
+ // #STEP4 Creating Host Buffer ================================  
+     // aceBCInstallHBuf()
+ // ===========================================================        
 
 }
 
 void BU67103x::start()
 {
-   show("BU67103x is starting");
-   // aceBCStart()
+  signed short wResult;
+
+  if(!mIsConfigurated)
+  {
+    if (!mIsConfigurated)
+    {
+        std::cout<<"[WARN]\tBefore you start, mConfig must be configurated."<<std::endl;
+        return;
+    }     
+  }
+
+  std::cout<<"\n\tBU67103x is starting..."<<std::endl;
+
+  wResult  = aceBCStart(mConfig.getDeviceNumber(), cMajorFrameId, -1);
+
+  if(ACE_ERR_SUCCESS != wResult)
+  {
+    mIsStarted = false;
+    getError(wResult);
+    std::cout<<"[FAIL]\t"<<"mConfig could not be started." <<std::endl;
+    return;
+  }
+  else
+  {
+    mIsStarted = true;
+    std::cout<<"[OK]\t"<<"mConfig has just been started successfully." <<std::endl;     
+    std::cout<<"[OK]\t"<<"Running . . ." <<std::endl;     
+  }  
 }
+
 
 void BU67103x::stop()
 {
-   show("BU67103x is stoping");
-   // aceBCStop()
+  signed short wResult;
+ 
+  if(!mIsStarted)
+  {
+    if (!mIsStarted)
+    {
+        std::cout<<"[WARN]\tBefore you configure, mConfig must be started."<<std::endl;
+        return;
+    }     
+  }
+
+  std::cout<<"\n\tBU67103x is stoping..."<<std::endl;
+
+  wResult  = aceBCStop(mConfig.getDeviceNumber());
+
+  if(ACE_ERR_SUCCESS != wResult)
+  {
+    getError(wResult);
+    std::cout<<"[FAIL]\t"<<"mConfig could not be stopped." <<std::endl;
+    return;
+  }
+  else
+  {
+    std::cout<<"[OK]\t"<<"mConfig has just been stopped successfully." <<std::endl;         
+  }
 }
 
 void BU67103x::read()
@@ -469,7 +587,7 @@ void BU67103x::getError(S16BIT nResult)
 
 // Utility function to find 
 // GCD of 'a' and 'b' 
-int BU67103x::getGCD(int a, int b) 
+short BU67103x::getGCD(short a, short b) 
 { 
     if (b == 0) 
         return a; 
@@ -478,9 +596,9 @@ int BU67103x::getGCD(int a, int b)
 
 // Function to find gcd of array of 
 // numbers 
-int BU67103x::getGCD(std::vector<int> list) 
+short BU67103x::getGCD(std::vector<short> list) 
 { 
-    int gcd = list[0]; 
+    short gcd = list[0]; 
 
     for(auto it = list.begin(); it != list.end(); ++it)
     {
@@ -490,10 +608,10 @@ int BU67103x::getGCD(std::vector<int> list)
     return gcd; 
 } 
 
-long long BU67103x::getLCM(std::vector<int> list)
+short BU67103x::getLCM(std::vector<short> list)
 {
     // Initialize result 
-    long long lcm = list[0]; 
+    short lcm = list[0]; 
   
     // ans contains LCM of list[0], ..list[i] 
     // after i'th iteration,     

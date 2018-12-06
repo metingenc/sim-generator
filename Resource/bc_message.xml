@@ -1,48 +1,48 @@
 <?xml version="1.0"?>
 <BCMessageList type="Bus Control Message Structure">
 	<Messages>
-		<Message name ="Message1">
+		<Message name ="Receive Debrief Data">
 			<Param messageType="0"/> 	 <!-- BCtoRT: 0, RTtoBC= 1 -->
 			<Param syncType="0"/>    	 <!-- Sync Message: 0, Async Message:1 -->
-			<Param frequency="1"/>	 	 <!-- 1hz, 2hz, 5hz, 10hz etc. -->	
-			<Param remoteTerminal="17"/> <!-- Remote Terminal address of destination RT -->
+			<Param frequency="20"/>	 	 <!-- 1hz, 2hz, 5hz, 10hz etc. -->	
+			<Param remoteTerminal="7"/> <!-- Remote Terminal address of destination RT -->
 			<Param subAddress="9"/>		 <!-- Remote Terminal subaddress -->
 			<Param wordCount="27"/>		 <!-- Message word count of message -->
 			<Param messageGapTime="0"/>  <!-- The time to next msg in μseconds -->	
-			<Param messageOptions="0"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
+			<Param messageOptions="128"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
 		</Message>
 		
 		<Message name ="Message2">
 			<Param messageType="0"/> 	 <!-- BCtoRT: 0, RTtoBC= 1 -->
 			<Param syncType="0"/>    	 <!-- Sync Message: 0, Async Message:1 -->
 			<Param frequency="4"/>	 	 <!-- 1hz, 2hz, 5hz, 10hz etc. -->	
-			<Param remoteTerminal="17"/> <!-- Remote Terminal address of destination RT -->
+			<Param remoteTerminal="7"/> <!-- Remote Terminal address of destination RT -->
 			<Param subAddress="10"/>	 <!-- Remote Terminal subaddress -->
 			<Param wordCount="2"/>		 <!-- Message word count of message -->
 			<Param messageGapTime="0"/>  <!-- The time to next msg in μseconds -->	
-			<Param messageOptions="0"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
+			<Param messageOptions="128"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
 		</Message>
 		
 		<Message name ="Message3">
 			<Param messageType="0"/> 	 <!-- BCtoRT: 0, RTtoBC= 1 -->
 			<Param syncType="0"/>    	 <!-- Sync Message: 0, Async Message:1 -->
 			<Param frequency="5"/>	 	 <!-- 1hz, 2hz, 5hz, 10hz etc. -->	
-			<Param remoteTerminal="17"/> <!-- Remote Terminal address of destination RT -->
+			<Param remoteTerminal="7"/> <!-- Remote Terminal address of destination RT -->
 			<Param subAddress="11"/>	 <!-- Remote Terminal subaddress -->
 			<Param wordCount="11"/>		 <!-- Message word count of message -->
 			<Param messageGapTime="0"/>  <!-- The time to next msg in μseconds -->	
-			<Param messageOptions="0"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
+			<Param messageOptions="128"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
 		</Message>		
 
 		<Message name ="message4">
 			<Param messageType="0"/> 	 <!-- BCtoRT: 0, RTtoBC= 1 -->
 			<Param syncType="0"/>    	 <!-- Sync Message: 0, Async Message:1 -->
 			<Param frequency="10"/>	 	 <!-- 1hz, 2hz, 5hz, 10hz etc. -->	
-			<Param remoteTerminal="17"/> <!-- Remote Terminal address of destination RT -->
+			<Param remoteTerminal="7"/> <!-- Remote Terminal address of destination RT -->
 			<Param subAddress="12"/>	 <!-- Remote Terminal subaddress -->
 			<Param wordCount="13"/>		 <!-- Message word count of message -->
 			<Param messageGapTime="0"/>  <!-- The time to next msg in μseconds -->	
-			<Param messageOptions="0"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
+			<Param messageOptions="128"/>  <!-- The BC control word of the msg blocksee sw reference for details. -->			
 		</Message>
 		
 	</Messages>

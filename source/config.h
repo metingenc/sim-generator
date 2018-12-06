@@ -66,6 +66,8 @@ const unsigned short int cFlags = 0;              // Allows the SDK to use defau
 // aceBCInstallHBuf
 const unsigned int       cHBufSize = 0;           // [(NUM_MESSSAGES)*40words]*256 -> 4K – 5000K 16-bit words
 
+// cMajorFrameId
+const unsigned short cMajorFrameId = 1;
 
 // ====================================================================================================
 

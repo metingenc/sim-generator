@@ -20,7 +20,7 @@ add_definitions(-Wextra)
 include_directories(source)
 include_directories(externals/aceXtreme/include)
 include_directories(externals/pugixml-1.9/include)
-link_directories(externals/aceXtreme/lib/win/x64/release)
+link_directories(externals/aceXtreme/lib/win/x32/release)
 link_directories(externals/pugixml-1.9/lib)
 
 add_subdirectory(source)
