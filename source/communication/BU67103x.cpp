@@ -4,7 +4,8 @@
 #include "config.h"
 
 
-BU67103x::BU67103x() : mIsInitialized(false), mIsConfigurated(false), mIsStarted(false), mLibVersion(0,0,0)
+BU67103x::BU67103x(AceDevice &aceConfig, std::map<short,AceBCMessage> &messages) : mIsInitialized(false),
+ mIsConfigurated(false), mIsStarted(false), mLibVersion(0,0,0), mConfig(aceConfig), mMessages(messages)
 {
   getVersion();
 }
@@ -14,12 +15,9 @@ BU67103x::~BU67103x()
 
 }
 
-void BU67103x::initialize(AceDevice aceConfig, std::map<short,AceBCMessage> messages)
+void BU67103x::initialize()
 { 
 	S16BIT wResult = 0x0000;	
-
-  mConfig = aceConfig;
-  mMessages = messages;
 
   std::cout << "\tBU67103x is initializing...";  
 	
@@ -38,11 +36,6 @@ void BU67103x::initialize(AceDevice aceConfig, std::map<short,AceBCMessage> mess
 		std::cout<<"\tAccess:\t" + std::to_string(mConfig.getAccess())<<std::endl;
 		std::cout<<"\tMode:\t" + std::to_string(mConfig.getMode())<<std::endl;
 	}  
-}
-
-void BU67103x::initialize()
-{
-
 }
 
 void BU67103x::deInitialize()
@@ -122,7 +115,7 @@ void BU67103x::createBCObjects()
     if(SyncType::SYNC == it->second.getSyncType())
     {      
       wResult = aceBCDataBlkCreate(mConfig.getDeviceNumber(), it->first, ACE_BC_DBLK_SINGLE, it->second.getBuffer(), 32); 
-
+      
       if(ACE_ERR_SUCCESS != wResult)
       {
          getError(wResult);
@@ -526,10 +519,42 @@ void BU67103x::read()
    // aceBCDataBlkRead()
 }
 
+void BU67103x::write(AceBCMessage &message)
+{   
+  signed short wResult = -1;
+
+    unsigned short wBuffer[32] = { 0xFFFF,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
+                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
+  //if(SyncType::SYNC == message.getSyncType())
+  //{
+    for(auto it = mMessages.begin(); it != mMessages.end(); ++it)
+    {
+      wResult = aceBCDataBlkWrite(mConfig.getDeviceNumber(), it->second.generateKey(),it->second.getBuffer(),it->second.getWordCount(),0); 
+
+      if(ACE_ERR_SUCCESS != wResult)
+      {
+        getError(wResult);
+        std::cout<<"[FAIL]\t"<<it->second.generateKey()<<" MSG "<<it->second.getRemoteTerminal()<<"-"<<it->second.getSubAddress()<<"-"<<it->second.getWordCount()<<std::endl;    
+        return;
+      }
+      else
+      {
+        std::cout<<"[OK]\t"<<it->second.generateKey()<<" MSG "<<it->second.getRemoteTerminal()<<"-"<<it->second.getSubAddress()<<"-"<<it->second.getWordCount()<<std::endl;      
+        std::cout<<"\n";
+        
+      }       
+    }
+
+
+
+}
+
+
 void BU67103x::write()
-{
-   show("BU67103x is writing");
-   // aceBCDataBlkWrite()
+{   
+   //aceBCDataBlkWrite()
    // aceBCSendAsyncMsgHP()
 }
 

@@ -30,9 +30,8 @@ struct LibVersion
 class BU67103x : public c1553Device
 {
 public:
-   BU67103x();
-   ~BU67103x();
-   void initialize(AceDevice aceConfig, std::map<short,AceBCMessage> messages);
+   BU67103x(AceDevice &aceConfig, std::map<short,AceBCMessage> &messages);
+   ~BU67103x();   
    void initialize();
    void deInitialize();   
    void configure();   
@@ -40,6 +39,7 @@ public:
    void stop();
    void read();
    void write();
+   void write(AceBCMessage &message);
    void show(const std::string text);
    
  private:
@@ -50,8 +50,8 @@ public:
   	void getError(S16BIT nResult);
 	  struct LibVersion mLibVersion;
 
-    AceDevice mConfig;
-    std::map<short,AceBCMessage> mMessages;
+    AceDevice &mConfig;
+    std::map<short,AceBCMessage> &mMessages;
 
     void createBCObjects();
     short getGCD(short a, short b); 

@@ -7,6 +7,7 @@
 #include "communication/AceDevice.h"
 #include "loader/ConfigLoader.h"
 #include "loader/BcMessageLoader.h"
+#include "loader/TestCaseLoader.h"
 	
 
 int main()
@@ -16,13 +17,17 @@ int main()
     std::cout<<" ============================================================"<<std::endl;
 
 
-    BU67103x *device = new BU67103x();
+    
 
     ConfigLoader configLoader("config.xml");
     AceDevice aceConfig = configLoader.load();
 
 	  BcMessageLoader messageLoader("bc_message.xml");
 	  std::map<short,AceBCMessage> messages = messageLoader.load();
+
+    TestCaseLoader testCaseLoader("TestCase1.xml");
+
+    BU67103x *device = new BU67103x(aceConfig, messages);
 
     std::string cmd = "help";
     while(cmd != "exit")
@@ -32,7 +37,7 @@ int main()
       
       if( cmd == "init")
       {
-        device->initialize(aceConfig,messages);
+        device->initialize();
       }
       else if(cmd == "config")
       {
@@ -56,11 +61,20 @@ int main()
       }
       else if( cmd == "run")
       {
-        device->initialize(aceConfig,messages);
+        device->initialize();
         device->configure();
         device->start();        
       }
-
+      else if( cmd == "write")
+      { 
+        for(auto it = messages.begin(); it != messages.end(); ++it)    
+        {
+          std::cout<<"X "<<it->second.getBuffer()<<std::endl;
+          device->write(it->second);
+          break;
+        }   
+          
+      }
       else if( cmd == "help")
       {  
          std::cout<<"\t[init]  \tInitializes hardware resources."<<std::endl;            

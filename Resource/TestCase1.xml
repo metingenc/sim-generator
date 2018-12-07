@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<TestCase name="Debrief Test">
+	<TestSteps>
+		<Step1 name ="Debrief Data Validity">
+			<Param messageType="0"/> 	   <!-- BCtoRT: 0, RTtoBC= 1 -->
+			<Param syncType="0"/>    	   <!-- Sync Message: 0, Async Message:1 -->			
+			<Param remoteTerminal="7"/>    <!-- Remote Terminal address of destination RT -->
+			<Param subAddress="9"/>		   <!-- Remote Terminal subaddress -->
+			<Param wordCountIndex="1"/>	   <!-- must be equal or less than word count -->
+			<Param dataLsb="1"/>	   	   <!-- LSB Scale of data -->
+			<Param dataSize="1"/>	   	   <!-- Data -->
+			<Param dataValue1="65535"/>	   <!-- Datavalue of the message -->
+			<Param delay="1"/>	   	   <!-- ms -->
+		</Step1>				
+	</TestSteps>
+</TestCase>
