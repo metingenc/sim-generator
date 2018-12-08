@@ -9,6 +9,7 @@
 #include "c1553Device.h"
 #include "AceBCMessage.h"
 #include "AceDevice.h"
+#include "AceTestMessage.h"
 
 struct LibVersion
 {
@@ -39,7 +40,7 @@ public:
    void stop();
    void read();
    void write();
-   void write(AceBCMessage &message);
+   void write(std::vector<AceTestMessage> &testMessages);
    void show(const std::string text);
    
  private:

@@ -1,7 +1,14 @@
 #include <iostream>
+#include <iomanip>
+#include <chrono>
+#include <thread>
 
 #include "BU67103x.h"
 #include "config.h"
+
+
+
+
 
 
 BU67103x::BU67103x(AceDevice &aceConfig, std::map<short,AceBCMessage> &messages) : mIsInitialized(false),
@@ -66,7 +73,7 @@ void BU67103x::configure()
 
   if (!mIsInitialized)
   {
-      std::cout<<"[WARN]\tBefore you configure, mConfig must be initialized."<<std::endl;
+      std::cout<<"[WARN]\tBefore you configure, Device must be initialized."<<std::endl;
       return;
   }    
   
@@ -100,7 +107,7 @@ void BU67103x::createBCObjects()
   
   if (!mIsConfigurated)
   {
-      std::cout<<"[WARN]\tBefore you create objects, mConfig must be configurated."<<std::endl;
+      std::cout<<"[WARN]\tBefore you create objects, Device must be configurated."<<std::endl;
       return;
   } 
 
@@ -458,7 +465,7 @@ void BU67103x::start()
   {
     if (!mIsConfigurated)
     {
-        std::cout<<"[WARN]\tBefore you start, mConfig must be configurated."<<std::endl;
+        std::cout<<"[WARN]\tBefore you start, Device must be configurated."<<std::endl;
         return;
     }     
   }
@@ -471,13 +478,13 @@ void BU67103x::start()
   {
     mIsStarted = false;
     getError(wResult);
-    std::cout<<"[FAIL]\t"<<"mConfig could not be started." <<std::endl;
+    std::cout<<"[FAIL]\t"<<"Device could not be started." <<std::endl;
     return;
   }
   else
   {
     mIsStarted = true;
-    std::cout<<"[OK]\t"<<"mConfig has just been started successfully." <<std::endl;     
+    std::cout<<"[OK]\t"<<"Device has just been started successfully." <<std::endl;     
     std::cout<<"[OK]\t"<<"Running . . ." <<std::endl;     
   }  
 }
@@ -487,14 +494,13 @@ void BU67103x::stop()
 {
   signed short wResult;
  
-  if(!mIsStarted)
+
+  if (!mIsStarted)
   {
-    if (!mIsStarted)
-    {
-        std::cout<<"[WARN]\tBefore you configure, mConfig must be started."<<std::endl;
-        return;
-    }     
-  }
+      std::cout<<"[WARN]\tBefore you configure, Device must be started."<<std::endl;
+      return;
+  }     
+  
 
   std::cout<<"\n\tBU67103x is stoping..."<<std::endl;
 
@@ -503,12 +509,12 @@ void BU67103x::stop()
   if(ACE_ERR_SUCCESS != wResult)
   {
     getError(wResult);
-    std::cout<<"[FAIL]\t"<<"mConfig could not be stopped." <<std::endl;
+    std::cout<<"[FAIL]\t"<<"Device could not be stopped." <<std::endl;
     return;
   }
   else
   {
-    std::cout<<"[OK]\t"<<"mConfig has just been stopped successfully." <<std::endl;         
+    std::cout<<"[OK]\t"<<"Device has just been stopped successfully." <<std::endl;         
   }
 }
 
@@ -519,33 +525,59 @@ void BU67103x::read()
    // aceBCDataBlkRead()
 }
 
-void BU67103x::write(AceBCMessage &message)
+void BU67103x::write(std::vector<AceTestMessage> &testMessages)
 {   
   signed short wResult = -1;
 
-    unsigned short wBuffer[32] = { 0xFFFF,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
-                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
-                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
-                                  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000};
-  //if(SyncType::SYNC == message.getSyncType())
-  //{
-    for(auto it = mMessages.begin(); it != mMessages.end(); ++it)
+  if (!mIsStarted)
+  {
+      std::cout<<"[WARN]\tBefore you write, device must be started."<<std::endl;
+      return;
+  }   
+
+  for(auto itv = testMessages.begin(); itv != testMessages.end(); ++itv)
+  {
+    if(SyncType::SYNC == (itv->getSyncType()))
     {
-      wResult = aceBCDataBlkWrite(mConfig.getDeviceNumber(), it->second.generateKey(),it->second.getBuffer(),it->second.getWordCount(),0); 
+      short key = itv->getKey();
+      unsigned index = itv->getWordCountIndex(); 
+         
+      mMessages[key].getBuffer()[index] = itv->getDataLSW();
+      
+      if(itv->getDataSize() == 2)
+      {        
+        mMessages[key].getBuffer()[index+1] = itv->getDataMSW();
+      }     
+
+      wResult = aceBCDataBlkWrite(mConfig.getDeviceNumber(), mMessages[key].generateKey(),mMessages[key].getBuffer(),mMessages[key].getWordCount(),0);       
 
       if(ACE_ERR_SUCCESS != wResult)
       {
         getError(wResult);
-        std::cout<<"[FAIL]\t"<<it->second.generateKey()<<" MSG "<<it->second.getRemoteTerminal()<<"-"<<it->second.getSubAddress()<<"-"<<it->second.getWordCount()<<std::endl;    
+        std::cout<<"[FAIL]\t"<<mMessages[key].generateKey()<<"\tMSG "<<mMessages[key].getRemoteTerminal()<<"-"<<mMessages[key].getSubAddress()<<"-"<<mMessages[key].getWordCount()<<std::endl;    
         return;
       }
       else
       {
-        std::cout<<"[OK]\t"<<it->second.generateKey()<<" MSG "<<it->second.getRemoteTerminal()<<"-"<<it->second.getSubAddress()<<"-"<<it->second.getWordCount()<<std::endl;      
-        std::cout<<"\n";
+        std::cout<<"[OK]\t"<<mMessages[key].generateKey()<<"\tMSG\t["<<mMessages[key].getRemoteTerminal()<<"-"<<mMessages[key].getSubAddress()<<"-"<<mMessages[key].getWordCount()<<"]\t";
+        std::cout<<itv->getName()<<std::endl;
+        std::cout<<"\t\tDATA\t";
+        for(int i = 0; i<mMessages[key].getWordCount(); i++)
+        {
+             std::cout<<std::hex<<std::uppercase<<std::setfill('0') << std::setw(4)<<mMessages[key].getBuffer()[i]<<" ";
+             if(i==mMessages[key].getWordCount()/2)
+              std::cout<<"\n\t\t\t";
+        }
+        std::cout<<"\n\n";
         
       }       
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(itv->getDelay()));     
+      
     }
+
+  }
+
 
 
 
@@ -594,8 +626,9 @@ void BU67103x::getVersion(void)
     version.append(std::to_string(mLibVersion.minor)+ ".");
     version.append(std::to_string(mLibVersion.development)+ ".");
     if ((wLibVer&0xF)!=0)
-    version.append(" (INTERIM VERSION)");
-	show(version);
+    version.append(" (INTERIM VERSION)");    
+	  std::cout<<version<<std::endl;
+    std::cout<<" ============================================================"<<std::endl;
 
 }
 
