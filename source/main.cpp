@@ -82,6 +82,7 @@ int main()
         TestCaseLoader testCaseLoader(testMessagePath);
         testMessages = testCaseLoader.load();
 
+        device.deInitialize();
         device.initialize();
         device.configure();
         device.start();        

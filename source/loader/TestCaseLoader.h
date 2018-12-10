@@ -1,7 +1,10 @@
 #ifndef TEST_CASE_LOADER_H
 #define TEST_CASE_LOADER_H
 
- #include "Communication/AceTestMessage.h"
+
+#include "Communication/AceTestMessage.h"
+
+
 
 class TestCaseLoader
 {
@@ -90,12 +93,16 @@ public:
 				        	testMessage.setDataSize(aitp->as_uint());
 				        }
 				        else if(attributeName == "dataLsw")
-				        {
-				        	testMessage.setDataLSW(aitp->as_uint());
+				        {				        	
+				        	std::string hexStr = aitp->value();				        	
+				        	unsigned value = std::stoi(hexStr,0,16);
+				        	testMessage.setDataLSW(value);							        		        	
 				        }
 				        else if(attributeName == "dataMsw")
 				        {
-				        	testMessage.setDataMSW(aitp->as_uint());
+				        	std::string hexStr = aitp->value();				        	
+				        	unsigned value = std::stoi(hexStr,0,16);
+				        	testMessage.setDataMSW(value);
 				        }
 				        else if(attributeName == "delay")
 				        {

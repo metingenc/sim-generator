@@ -1,7 +1,8 @@
 #include <iostream>
 #include <iomanip>
-#include <chrono>
-#include <thread>
+#include <Windows.h>
+
+
 
 #include "BU67103x.h"
 #include "config.h"
@@ -540,7 +541,7 @@ void BU67103x::write(std::vector<AceTestMessage> &testMessages)
     if(SyncType::SYNC == (itv->getSyncType()))
     {
       short key = itv->getKey();
-      unsigned index = itv->getWordCountIndex(); 
+      unsigned index = itv->getWordCountIndex()-1; 
          
       mMessages[key].getBuffer()[index] = itv->getDataLSW();
       
@@ -572,7 +573,7 @@ void BU67103x::write(std::vector<AceTestMessage> &testMessages)
         
       }       
 
-      std::this_thread::sleep_for(std::chrono::milliseconds(itv->getDelay()));     
+      Sleep(itv->getDelay());   
       
     }
 
